@@ -132,6 +132,21 @@ def main():
     # 加载配置
     config = load_config(args.config)
 
+    # 解析配置文件路径（用于回写）
+    resolved_config_path: Path | None = None
+    if args.config:
+        resolved_config_path = Path(args.config).expanduser()
+    else:
+        import os as _os
+        _env_path = _os.environ.get("HANK_CLAW_CONFIG")
+        if _env_path:
+            resolved_config_path = Path(_env_path).expanduser()
+        else:
+            for _candidate in [Path.cwd() / "config.yaml", Path.home() / "my-agent" / "config.yaml"]:
+                if _candidate.exists():
+                    resolved_config_path = _candidate
+                    break
+
     # 初始化日志
     log_level = "DEBUG" if args.debug else config.logging.level
     setup_logging(
@@ -151,7 +166,7 @@ def main():
 
     # Web UI 模式
     if args.web:
-        _run_web(config)
+        _run_web(config, config_path=resolved_config_path)
         return
 
     # 默认或 --cli 模式
@@ -159,7 +174,7 @@ def main():
     asyncio.run(_run_cli(config, prompt))
 
 
-def _run_web(config: AppConfig):
+def _run_web(config: AppConfig, config_path: Path | None = None):
     """运行 Web UI 模式。"""
     from webui.app import WebUI
 
@@ -172,6 +187,8 @@ def _run_web(config: AppConfig):
         registry=registry,
         max_turns=config.agent.max_turns,
         agent_name=config.agent.name,
+        config=config,
+        config_path=config_path,
     )
 
     logger.info("Web UI 启动: http://127.0.0.1:%d", config.channels.web.gradio_port)
