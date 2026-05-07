@@ -1,0 +1,102 @@
+# my-agent 配置文件模板
+# 复制为 config.yaml 并根据需要修改
+
+agent:
+  name: "my-agent"
+  working_dir: "."
+  language: "zh-CN"
+  max_turns: 50
+
+model:
+  provider: "deepseek"
+  providers:
+    deepseek:
+      base_url: "https://api.deepseek.com/v1"
+      api_key: "${DEEPSEEK_API_KEY}"
+      models: ["deepseek-v4-flash", "deepseek-chat", "deepseek-reasoner"]
+    openai:
+      base_url: "https://api.openai.com/v1"
+      api_key: "${OPENAI_API_KEY}"
+      models: ["gpt-4o", "gpt-4o-mini"]
+    qwen:
+      base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      api_key: "${DASHSCOPE_API_KEY}"
+      models: ["qwen-max", "qwen-plus"]
+    chatglm:
+      base_url: "https://open.bigmodel.cn/api/paas/v4"
+      api_key: "${ZHIPU_API_KEY}"
+      models: ["glm-4", "glm-4-flash"]
+  default_model: "deepseek-v4-flash"
+  fallback_model: null
+
+permissions:
+  mode: "default"
+  rules:
+    allow:
+      - "Read(*)"
+      - "Skill(*)"
+      - "Bash(ls *)"
+      - "Bash(git status)"
+      - "Bash(git log*)"
+      - "Bash(git diff*)"
+      - "Bash(git branch*)"
+      - "Bash(cat *)"
+      - "Bash(which *)"
+      - "Bash(echo *)"
+      - "Bash(python *)"
+    deny:
+      - "Bash(rm -rf /)"
+    ask:
+      - "Bash(pip install*)"
+      - "Write(*)"
+
+memory:
+  enabled: true
+  db_path: "./data/memory.db"
+  memory_md_limit: 2200
+  user_md_limit: 1375
+  vector_search:
+    enabled: false
+    host: "localhost"
+    port: 6333
+  dreaming:
+    enabled: true
+    idle_timeout_seconds: 300
+  stale_days: 30
+  archive_days: 90
+
+skills:
+  dirs:
+    - "./skills/skills"
+  auto_create: true
+  curator:
+    enabled: true
+    interval_seconds: 3600
+
+mcp_servers: {}
+
+gateway:
+  host: "127.0.0.1"
+  port: 8765
+  ws_path: "/ws"
+
+channels:
+  cli:
+    enabled: true
+  web:
+    enabled: true
+    gradio_port: 7860
+
+daemon:
+  enabled: false
+  label: "com.hankia.my-agent"
+  keep_alive: true
+  run_at_load: true
+  stdout_path: "./logs/stdout.log"
+  stderr_path: "./logs/stderr.log"
+
+logging:
+  level: "INFO"
+  file: "./logs/agent.log"
+  max_bytes: 10485760
+  backup_count: 5
