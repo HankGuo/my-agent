@@ -29,6 +29,9 @@ def _build_agent(config: AppConfig):
     from tools.builtin.bash import BashTool
     from tools.builtin.file_read import FileReadTool
     from tools.builtin.file_write import FileWriteTool
+    from tools.builtin.file_patch import FilePatchTool
+    from tools.builtin.test_runner import TestRunnerTool
+    from tools.builtin.git_ops import GitOpsTool
 
     # 模型 Provider
     provider_name = config.model.provider
@@ -45,7 +48,10 @@ def _build_agent(config: AppConfig):
 
     # 工具注册
     registry = ToolRegistry()
-    registry.register_many([BashTool(), FileReadTool(), FileWriteTool()])
+    registry.register_many([
+        BashTool(), FileReadTool(), FileWriteTool(),
+        FilePatchTool(), TestRunnerTool(), GitOpsTool(),
+    ])
 
     # 权限引擎
     permission = PermissionEngine(
